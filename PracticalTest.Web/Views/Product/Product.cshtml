@@ -1,0 +1,130 @@
+﻿
+@{
+    ViewData["Title"] = "Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="card">
+    <div class="card-header bg-primary text-white">Product</div>
+    <div class="card-body">
+        <div ng-app="app" ng-controller="ProductController" ng-cloak>
+           
+            <div>
+                <div class="row">
+                    <div class="col-md-7">
+                        <button type="button" class="btn btn-primary btn-sm" ng-click="add_edit_product(productModel,'Add')" id="product-add">Add</button>
+                    </div>
+                    <div class="input-group col-md-5">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-primary btn-sm px-3" ng-class="{'disabled': gridRequest.currentPage<=1}" type="button" ng-click="load_previos()" title="Previos">
+                                <i class="fa fa-chevron-left text-white"></i>
+                            </button>
+                        </div>
+                        <input ng-model="gridRequest.currentPage" min="1" ng-keyup="load_grid_check()" ng-change="get_products()" type="number" class="form-control page-input" placeholder="Current Page" readonly>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary btn-sm px-3" type="button" ng-click="load_next()" ng-class="{'disabled': gridRequest.currentPage>=totalPages}" title="Next">
+                                <i class="fa fa-chevron-right text-white"></i>
+                            </button>
+                        </div>
+                        <div class="ml-3">
+                            <span>{{gridRequest.currentPage}}</span> of <span>{{totalPages}}</span>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Product Description</th>
+                            <th>Category Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="productItem in dataList">
+                            <td>{{productItem.prodName}}</td>
+                            <td>{{productItem.prodDescription}}</td>
+                            <td>{{productItem.categoryName}}</td>
+                            <td><a class="btn btn-warning" ng-click="add_edit_product(productItem,'Edit')">Edit</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal fade add-edit-product-modal" id="productFormModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content px-0">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">
+                                <span id="add-edit-product-title" class="mb-0">{{commandName}} Product</span>
+                            </h5>
+                            <button type="button" class="close" ng-click="close()">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="form-horizontal row" name="productForm" ng-submit="productForm.$valid && save_product()" novalidate>
+                                <input type="hidden" ng-model="productModel.productId" />
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4" for="prodCatId">Category:</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-control" ng-model="productModel.prodCatId" id="prodCatId" name="prodCatId" ng-change="get_product_attribute()" required>
+                                                <option value="">-Select Category-</option>
+                                                <option ng-repeat="category in categoryList" value="{{category.prodCatId}}" ng-selected="category.prodCatId==productModel.prodCatId">
+                                                    {{category.categoryName}}
+                                                </option>
+                                            </select>
+                                            <div ng-show="(productForm.$submitted && productForm.prodCatId.$invalid)||(productForm.prodCatId.$touched && productForm.prodCatId.$invalid)" class="text-danger">Category is required!</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4" for="prodName">Name:</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="prodName" name="prodName" ng-model="productModel.prodName" required maxlength="250"/>
+                                            <div ng-show="(productForm.$submitted && productForm.prodName.$invalid)||(productForm.prodName.$touched && productForm.prodName.$invalid)" class="text-danger">Product Name is required!</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="control-label col-sm-4" for="prodDescription">Description:</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="prodDescription" name="prodDescription" ng-model="productModel.prodDescription" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group" ng-repeat="productAttributeItem in productModel.productAttributes">
+                                        <label class="control-label col-sm-5" for="{{productAttributeItem.attributeName | removeSpaces}}">{{productAttributeItem.attributeName}}:</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="{{productAttributeItem.attributeName | removeSpaces}}" name="{{productAttributeItem.attributeName | removeSpaces}}" ng-model="productAttributeItem.attributeValue" required/>
+                                            <div ng-show="(productForm.$submitted && productForm.{{productAttributeItem.attributeName | removeSpaces}}.$invalid)||(productForm.{{productAttributeItem.attributeName | removeSpaces}}.$touched && productForm.{{productAttributeItem.attributeName | removeSpaces}}.$invalid)" class="text-danger">{{productAttributeItem.attributeName}} is required!</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="col-sm-8">
+                                            <button type="submit" class="btn btn-primary" >Save</button>
+                                            <button type="button" class="btn btn-danger" ng-click="reset()">Cancle</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script>
+        var product_config = {
+            url : {
+                get_category: '@Url.Action("GetCategories", "Product")',
+                get_product: '@Url.Action("GetProducts", "Product")',
+                get_product_attribute: '@Url.Action("GetProductAttribute", "Product")',
+                save_product: '@Url.Action("SaveProduct", "Product")',
+            }
+        };
+    </script>
+    <script src="~/AppScript/Product/Product.js"></script>
+}
